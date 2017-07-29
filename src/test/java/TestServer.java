@@ -16,6 +16,7 @@ public class TestServer {
         Starter starter=new Starter();
         starter.start();
         System.out.println();
+        System.out.println("aa");
     }
 
 }
