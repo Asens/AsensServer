@@ -17,6 +17,7 @@ public class TestServer {
         starter.start();
         System.out.println();
         System.out.println("aa");
+        System.out.println("bb");
     }
 
 }
