@@ -1,0 +1,4 @@
+/target/*
+!.gitignore
+AsensServer.iml
+/.idea/*
