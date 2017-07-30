@@ -6,4 +6,5 @@ package cn.asens.process;
  **/
 
 public class WorkerPool {
+    private final static int POOL_SIZE=Runtime.getRuntime().availableProcessors();
 }
