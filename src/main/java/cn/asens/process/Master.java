@@ -15,4 +15,9 @@ public interface Master extends Runnable{
      * bind port and begin to accept request
      */
     void bind();
+
+    /**
+     * handle the income requests ,accept and register to worker thread
+     */
+    void handleRequest();
 }

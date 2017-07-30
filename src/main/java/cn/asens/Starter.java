@@ -1,8 +1,13 @@
 package cn.asens;
 
+import cn.asens.process.MasterPool;
+import cn.asens.process.WorkerPool;
+
 public class Starter {
 
     public void start(){
-        System.out.println("start");
+        MasterPool masterPool=new MasterPool();
+        WorkerPool workerPool=new WorkerPool();
+
     }
 }
