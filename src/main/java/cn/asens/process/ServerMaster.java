@@ -7,6 +7,10 @@ package cn.asens.process;
 
 public class ServerMaster implements Master{
 
+    public ServerMaster() {
+
+    }
+
     public void registerTask(WorkerTask workerTask) {
 
     }
