@@ -50,6 +50,7 @@ public class ServerMaster implements Master{
             SelectionKey k = i.next();
             i.remove();
             if (k.isAcceptable()) {
+                ServerSocketChannel channel=(ServerSocketChannel)k.channel();
                 //handleAccept(k);
             }
         }
