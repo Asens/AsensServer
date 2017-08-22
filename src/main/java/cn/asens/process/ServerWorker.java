@@ -28,6 +28,7 @@ public class ServerWorker implements Worker{
 
     public void registerTask(WorkerTask workerTask) {
         taskQueue.add(workerTask);
+        wakeUp();
     }
 
     public void run() {
@@ -40,6 +41,10 @@ public class ServerWorker implements Worker{
                 e.printStackTrace();
             }
         }
+    }
+
+    public void wakeUp(){
+        selector.wakeup();
     }
 
     private void processRequest() throws IOException {
@@ -59,25 +64,27 @@ public class ServerWorker implements Worker{
 
     private void handleRead(SelectionKey k) throws IOException {
         SocketChannel channel = (SocketChannel) k.attachment();
-        try {
-            ByteBuffer buf = ByteBuffer.allocate(1024);
-            int readBytes = 0;
-            int ret = 0;
-            while ((ret = channel.read(buf)) > 0) {
-                readBytes += ret;
-                if (!buf.hasRemaining())
-                    break;
 
-            }
-            if (readBytes > 0) {
-                buf.flip();
-                String message = new String(buf.array(), "utf-8");
-                System.out.println(message);
-            }
+        ByteBuffer buf = ByteBuffer.allocate(1024);
+        int readBytes = 0;
+        int ret = 0;
+        boolean failure = true;
+        while ((ret = channel.read(buf)) > 0) {
+            readBytes += ret;
+            if (!buf.hasRemaining())
+                break;
+            failure=false;
+        }
+        if (readBytes > 0) {
+            buf.flip();
+            String message = new String(buf.array(), "utf-8");
+            System.out.println(message);
+        }
 
-            channel.write(buf);
-        }finally {
-            channel.finishConnect();
+        channel.write(buf);
+
+        if (ret < 0|| failure) {
+            k.cancel();
             channel.close();
         }
     }
