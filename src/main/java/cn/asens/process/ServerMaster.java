@@ -23,21 +23,24 @@ public class ServerMaster implements Master{
 
 
     public ServerMaster(){
-        bind();
+        try {
+            selector = Selector.open();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void registerTask(WorkerTask workerTask) {
 
     }
 
-    public void bind() {
+    public void bind(WorkerPool workerPool) {
         try {
-            selector = Selector.open();
             ServerSocketChannel socketChannel = ServerSocketChannel.open();
             InetSocketAddress address=new InetSocketAddress(Constants.HOST, Constants.PORT);
             socketChannel.socket().bind(address, Constants.BACK_LOG);
             socketChannel.configureBlocking(false);
-            socketChannel.register(selector, SelectionKey.OP_ACCEPT);
+            socketChannel.register(selector, SelectionKey.OP_ACCEPT,workerPool);
         }catch (Throwable t){
             throw new BindFailException("master bind fail :"+t.getMessage());
         }
@@ -47,28 +50,38 @@ public class ServerMaster implements Master{
         Set<SelectionKey> selectedKeys = selector.selectedKeys();
         if(selectedKeys==null||selectedKeys.size()==0) return;
         for (Iterator<SelectionKey> i = selectedKeys.iterator(); i.hasNext(); ) {
+            System.out.println("accept");
             SelectionKey k = i.next();
             i.remove();
             if (k.isAcceptable()) {
-                ServerSocketChannel channel=(ServerSocketChannel)k.channel();
-                //handleAccept(k);
+                try {
+                    handleAccept(k);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    close();
+                }
             }
         }
+    }
+
+    private void close() {
+
     }
 
 
     private void handleAccept(SelectionKey k) throws IOException {
         ServerSocketChannel channel=(ServerSocketChannel)k.channel();
         SocketChannel acceptedSocket = channel.accept();
-        acceptedSocket.configureBlocking(false);
-        acceptedSocket.register(selector,SelectionKey.OP_READ,acceptedSocket);
+        WorkerPool workerPool=(WorkerPool)k.attachment();
+        Worker worker=workerPool.nextWorker();
+        worker.registerTask(new WorkerTask(acceptedSocket));
     }
 
     public void run() {
         //阻塞,接受请求,注册任务
         for(;;){
             try {
-                selector.select();
+                selector.select(500);
                 handleRequest();
             } catch (IOException e) {
                 e.printStackTrace();

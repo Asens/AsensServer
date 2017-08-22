@@ -16,6 +16,7 @@ public class MasterPool {
     private AtomicInteger masterIndex=new AtomicInteger(0);
     private final static int POOL_SIZE=1;
     private final static String MASTER_PREFIX="server_master_";
+    private WorkerPool workerPool;
 
     public MasterPool(){
         this(POOL_SIZE);
@@ -38,4 +39,11 @@ public class MasterPool {
         }
     }
 
+    public void bind(WorkerPool workerPool) {
+        this.workerPool=workerPool;
+        for(int i=0;i<POOL_SIZE;i++){
+            Master master=masters[i];
+            master.bind(workerPool);
+        }
+    }
 }

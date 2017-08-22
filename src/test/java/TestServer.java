@@ -1,23 +1,27 @@
 import cn.asens.Starter;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+
 public class TestServer {
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception {
+        new TestServer().start();
+    }
 
-        //构建master线程池
-        //构建worker线程池
+    private void start() throws Exception{
+        for(int i=0;i<340000;i++){
+        Socket socket=new Socket("127.0.0.1",6666);
+        OutputStream os=socket.getOutputStream();
 
-        //启动master线程池
-        //启动worker线程池
+            os.write("aa".getBytes());
+            os.close();
+            socket.close();
+        }
 
-        //mater接受请求
-        //master把任务注册到worker线程
-        //worker线程处理请求,接受后关闭
-        Starter starter=new Starter();
-        starter.start();
+
         System.out.println();
-        System.out.println("aa");
-        System.out.println("bb");
     }
 
 }

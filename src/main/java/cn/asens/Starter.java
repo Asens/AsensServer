@@ -6,8 +6,12 @@ import cn.asens.process.WorkerPool;
 public class Starter {
 
     public void start(){
-        MasterPool masterPool=new MasterPool();
         WorkerPool workerPool=new WorkerPool();
+        MasterPool masterPool=new MasterPool();
+        masterPool.bind(workerPool);
+    }
 
+    public static void main(String[] args){
+        new Starter().start();
     }
 }
