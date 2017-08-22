@@ -10,10 +10,10 @@ public class TestServer {
         new TestServer().start();
     }
 
-    private void start() throws Exception{
-        for(int i=0;i<340000;i++){
-        Socket socket=new Socket("127.0.0.1",6666);
-        OutputStream os=socket.getOutputStream();
+    private void start() throws Exception {
+        for (int i = 0; i < 340000; i++) {
+            Socket socket = new Socket("127.0.0.1", 6666);
+            OutputStream os = socket.getOutputStream();
 
             os.write("aa".getBytes());
             os.close();
