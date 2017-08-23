@@ -11,17 +11,19 @@ public class TestServer {
     }
 
     private void start() throws Exception {
-        Socket socket = new Socket("127.0.0.1", 6666);
+        Socket socket = new Socket("123.56.150.17", 8080);
         OutputStream os = socket.getOutputStream();
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 30; i++) {
+
             os.write(("aa"+i).getBytes());
+
         }
-
-        Thread.sleep(1000);
-
         os.close();
         socket.close();
         System.out.println();
+
+
+
     }
 
 }

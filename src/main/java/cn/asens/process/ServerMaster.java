@@ -34,12 +34,13 @@ public class ServerMaster implements Master{
         }
     }
 
-
+    @Override
     public void bind(WorkerPool workerPool) {
         taskQueue.add(new MasterTask(workerPool));
         selector.wakeup();
     }
 
+    @Override
     public void handleRequest() {
         Set<SelectionKey> selectedKeys = selector.selectedKeys();
         if(selectedKeys==null||selectedKeys.size()==0) return;
@@ -71,6 +72,7 @@ public class ServerMaster implements Master{
         worker.registerTask(new WorkerTask(acceptedSocket));
     }
 
+    @Override
     public void run() {
         //阻塞,接受请求,注册任务
 

@@ -10,6 +10,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static cn.asens.process.ServerContext.*;
+
 /**
  * Created by Asens on 2017/8/22.
  */
@@ -24,13 +26,15 @@ public class ServerWorker implements Worker{
         }
     }
 
-    private final static Queue<WorkerTask> taskQueue=new ConcurrentLinkedQueue<WorkerTask>();
+    private final static Queue<WorkerTask> taskQueue=new ConcurrentLinkedQueue<>();
 
+    @Override
     public void registerTask(WorkerTask workerTask) {
         taskQueue.add(workerTask);
         wakeUp();
     }
 
+    @Override
     public void run() {
         for (; ; ) {
             try {
@@ -82,17 +86,15 @@ public class ServerWorker implements Worker{
         }
         if (readBytes > 0) {
             buf.flip();
-            String message = new String(buf.array(), "utf-8");
-            System.out.println(message);
+            fireMessageReceived(buf,channel);
         }
-
-        channel.write(buf);
 
         if (ret < 0|| failure) {
             k.cancel();
             channel.close();
         }
     }
+
 
     private void processTask() {
         for(;;){

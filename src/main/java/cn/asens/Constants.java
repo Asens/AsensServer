@@ -9,7 +9,7 @@ public class Constants {
 
     public final static String HOST="127.0.0.1";
 
-    public final static int PORT=6666;
+    public final static int PORT=8080;
 
     public final static Boolean BLOCK=false;
 
