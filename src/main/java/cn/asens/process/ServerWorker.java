@@ -56,7 +56,12 @@ public class ServerWorker implements Worker{
                 SelectionKey k = i.next();
                 i.remove();
                 if (k.isReadable()) {
-                    handleRead(k);
+                    try {
+                        handleRead(k);
+                    }catch (IOException e){
+                        SocketChannel channel = (SocketChannel) k.attachment();
+                         channel.close();
+                    }
                 }
             }
         }

@@ -51,7 +51,7 @@ public class NioServer {
 
     private void handleRead(SelectionKey k) throws IOException {
         SocketChannel channel = (SocketChannel) k.attachment();
-        try {
+
             ByteBuffer buf = ByteBuffer.allocate(1024);
             int readBytes = 0;
             int ret = 0;
@@ -67,11 +67,10 @@ public class NioServer {
                 System.out.println(message);
             }
 
-            channel.write(buf);
-        }finally {
-            channel.finishConnect();
-            channel.close();
-        }
+            //channel.write(buf);
+            if(ret<0){
+                channel.close();
+            }
 
     }
 

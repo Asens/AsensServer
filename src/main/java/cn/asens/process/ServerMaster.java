@@ -10,7 +10,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author Asens
@@ -21,6 +23,8 @@ public class ServerMaster implements Master{
 
     private volatile Selector selector;
 
+    private final static Queue<MasterTask> taskQueue=new ConcurrentLinkedQueue<MasterTask>();
+
 
     public ServerMaster(){
         try {
@@ -30,20 +34,10 @@ public class ServerMaster implements Master{
         }
     }
 
-    public void registerTask(WorkerTask workerTask) {
-
-    }
 
     public void bind(WorkerPool workerPool) {
-        try {
-            ServerSocketChannel socketChannel = ServerSocketChannel.open();
-            InetSocketAddress address=new InetSocketAddress(Constants.HOST, Constants.PORT);
-            socketChannel.socket().bind(address, Constants.BACK_LOG);
-            socketChannel.configureBlocking(false);
-            socketChannel.register(selector, SelectionKey.OP_ACCEPT,workerPool);
-        }catch (Throwable t){
-            throw new BindFailException("master bind fail :"+t.getMessage());
-        }
+        taskQueue.add(new MasterTask(workerPool));
+        selector.wakeup();
     }
 
     public void handleRequest() {
@@ -79,13 +73,51 @@ public class ServerMaster implements Master{
 
     public void run() {
         //阻塞,接受请求,注册任务
+
         for(;;){
             try {
-                selector.select(500);
+                System.out.println("before select");
+                selector.select();
+                System.out.println("master selector wakeup");
+                process();
                 handleRequest();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void process() {
+        for(;;){
+            if(taskQueue.isEmpty()) return;
+            MasterTask task=taskQueue.poll();
+            WorkerPool workerPool=task.getWorkerPool();
+            try {
+                ServerSocketChannel socketChannel = ServerSocketChannel.open();
+                InetSocketAddress address=new InetSocketAddress(Constants.HOST, Constants.PORT);
+                socketChannel.socket().bind(address, Constants.BACK_LOG);
+                socketChannel.configureBlocking(false);
+                socketChannel.register(selector, SelectionKey.OP_ACCEPT,workerPool);
+                //selector.wakeup();
+            }catch (Throwable t){
+                throw new BindFailException("master bind fail :"+t.getMessage());
+            }
+        }
+    }
+
+    private class MasterTask{
+        private WorkerPool workerPool;
+
+        MasterTask(WorkerPool workerPool) {
+            this.workerPool = workerPool;
+        }
+
+        public WorkerPool getWorkerPool() {
+            return workerPool;
+        }
+
+        public void setWorkerPool(WorkerPool workerPool) {
+            this.workerPool = workerPool;
         }
     }
 }

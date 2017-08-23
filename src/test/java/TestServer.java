@@ -13,12 +13,11 @@ public class TestServer {
     private void start() throws Exception {
         Socket socket = new Socket("127.0.0.1", 6666);
         OutputStream os = socket.getOutputStream();
-        for (int i = 0; i < 3; i++) {
-
-            System.out.println("aaa");
-            os.write("aa".getBytes());
-            Thread.sleep(1270);
+        for (int i = 0; i < 300; i++) {
+            os.write(("aa"+i).getBytes());
         }
+
+        Thread.sleep(1000);
 
         os.close();
         socket.close();
