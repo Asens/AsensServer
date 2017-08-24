@@ -14,11 +14,7 @@ public class Starter {
     }
 
     public static void main(String[] args){
-        new Starter().test();
+        new Starter().start();
     }
 
-    private void test() {
-        URL url=Thread.currentThread().getContextClassLoader().getResource("");
-        System.out.println(url.getFile());
-    }
 }

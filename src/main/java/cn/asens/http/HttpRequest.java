@@ -19,13 +19,17 @@ public class HttpRequest implements Request{
         this.message=message;
     }
 
-    private void parseHttpRequest() {
+    public void parseHttpRequest() {
         if(StringUtils.isBlank(message)){
             log.error("http request is empty or null");
             throw new HttpParseException("http request is empty or null");
         }
-
-
+        String[] arr=message.split("\r\n");
+        String info=arr[0];
+        String[] tem=info.split(" ");
+        method=tem[0];
+        requestPath=tem[1];
+        protocol=tem[2];
     }
 
     public HttpRequest(byte[] bytes){

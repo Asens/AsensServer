@@ -4,6 +4,7 @@ import cn.asens.handler.RequestHandler;
 import cn.asens.process.ServerContext;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -23,12 +24,31 @@ public class HttpHandler implements RequestHandler{
         }
         HttpRequest request=new HttpRequest(message);
         HttpResponse response=new HttpResponse(channel);
+        request.parseHttpRequest();
         String path=request.getRequestPath();
-        whiteFile(path,response);
+        try {
+            whiteFile(path,response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
-    private void whiteFile(String path, HttpResponse response) {
+    private void whiteFile(String path, HttpResponse response) throws IOException {
+        String basePath=ServerContext.ROOT_PATH+"index";
+        if(path.equals("/")) path="index.html";
+        String filePath=basePath+File.separator+path;
+        File target=new File(filePath);
+        if(!target.exists()){
+            response.sendError(404);
+            response.close();
+            return;
+        }
+
+        transferTo(target,response);
+    }
+
+    private void transferTo(File target, HttpResponse response) {
 
     }
 }

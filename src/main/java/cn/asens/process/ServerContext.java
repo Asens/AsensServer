@@ -2,6 +2,7 @@ package cn.asens.process;
 
 import cn.asens.handler.DefaultHandler;
 import cn.asens.handler.RequestHandler;
+import cn.asens.http.HttpHandler;
 import cn.asens.log.Log;
 import cn.asens.log.LoggerFactory;
 
@@ -18,7 +19,7 @@ import java.util.List;
  **/
 
 public class ServerContext {
-    private final static RequestHandler handler=new DefaultHandler();
+    private final static RequestHandler handler=new HttpHandler();
     public final static String ROOT_PATH=rootPath();
     private static Log log= LoggerFactory.getInstance();
 
