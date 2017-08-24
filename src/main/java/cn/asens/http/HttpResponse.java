@@ -3,6 +3,7 @@ package cn.asens.http;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -19,7 +20,16 @@ public class HttpResponse implements Response{
 
     @Override
     public void sendError(int status) {
-        String error="";
+        String error="HTTP/1.1 "+status+" ok\r\n"+
+                "Content-Type:text/html\r\n"+
+                "\r\n"+
+                "<h1>404</h1>";
+        try {
+            send(error);
+            close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -35,6 +45,7 @@ public class HttpResponse implements Response{
         send(new String(bytes,"UTF-8"));
     }
 
+
     @Override
     public void close() throws IOException {
         channel.close();
@@ -43,5 +54,18 @@ public class HttpResponse implements Response{
     @Override
     public SocketChannel getChannel() {
         return channel;
+    }
+
+    @Override
+    public void sendOk() throws IOException {
+        String message="HTTP/1.1 200 ok\r\n"+
+                //"Content-Type:text/html\r\n"+
+                "\r\n";
+        send(message);
+    }
+
+    @Override
+    public void send(byte[] bytes, int index, int length) throws IOException {
+        send(new String(bytes,index,length,"UTF-8"));
     }
 }

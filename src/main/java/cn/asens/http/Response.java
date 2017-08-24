@@ -1,6 +1,7 @@
 package cn.asens.http;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.channels.SocketChannel;
 
@@ -17,4 +18,8 @@ public interface Response {
     void close() throws IOException;
 
     SocketChannel getChannel();
+
+    void sendOk() throws IOException;
+
+    void send(byte[] bytes, int index, int length) throws IOException;
 }
