@@ -47,4 +47,9 @@ public class HttpRequest implements Request{
         return host;
     }
 
+    @Override
+    public String getProtocol() {
+        return protocol;
+    }
+
 }

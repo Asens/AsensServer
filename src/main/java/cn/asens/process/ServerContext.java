@@ -2,7 +2,11 @@ package cn.asens.process;
 
 import cn.asens.handler.DefaultHandler;
 import cn.asens.handler.RequestHandler;
+import cn.asens.log.Log;
+import cn.asens.log.LoggerFactory;
 
+import java.io.FileNotFoundException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -15,6 +19,17 @@ import java.util.List;
 
 public class ServerContext {
     private final static RequestHandler handler=new DefaultHandler();
+    public final static String ROOT_PATH=rootPath();
+    private static Log log= LoggerFactory.getInstance();
+
+    private static String rootPath() {
+        URL url=Thread.currentThread().getContextClassLoader().getResource("");
+        if(url==null){
+            log.error("root path not found");
+            throw new RuntimeException("root path not found");
+        }
+        return url.getFile();
+    }
 
     public static void fireMessageReceived(ByteBuffer buffer, SocketChannel channel){
         handler.handle(buffer,channel);
