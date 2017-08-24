@@ -27,7 +27,7 @@ public class DefaultHandler implements RequestHandler{
 
     @Override
     public void handle(ByteBuffer buffer, SocketChannel channel) {
-        String message = null;
+//        String message = null;
 //        try {
 //            message = new String(buffer.array(), "utf-8");
 //        } catch (UnsupportedEncodingException e) {
