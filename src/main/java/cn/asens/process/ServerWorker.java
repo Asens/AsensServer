@@ -77,7 +77,8 @@ public class ServerWorker implements Worker{
 
     private void handleRead(SelectionKey k) throws IOException {
         SocketChannel channel = (SocketChannel) k.attachment();
-        channel.socket().setSendBufferSize(4*1024*1024);
+        channel.configureBlocking(false);
+        //channel.socket().setSendBufferSize(4*1024*1024);
         ByteBuffer buf = ByteBuffer.allocate(1024);
         int readBytes = 0;
         int ret = 0;
