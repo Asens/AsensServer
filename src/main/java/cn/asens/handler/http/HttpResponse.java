@@ -1,13 +1,9 @@
-package cn.asens.http;
+package cn.asens.handler.http;
 
 import cn.asens.log.Log;
 import cn.asens.log.LoggerFactory;
 
-import javax.annotation.Resource;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -17,16 +13,17 @@ import java.nio.channels.SocketChannel;
  */
 public class HttpResponse implements Response{
     private Log log= LoggerFactory.getInstance();
-
+    private HttpRequest request;
     private SocketChannel channel;
 
-    public HttpResponse(SocketChannel channel) {
+    public HttpResponse(SocketChannel channel, HttpRequest request) {
         this.channel = channel;
+        this.request=request;
     }
 
     @Override
     public void sendError(int status) {
-        String error="HTTP/1.1 "+status+" ok\r\n"+
+        String error="HTTP/1.1 "+status+" error\r\n"+
                 "Content-Type:text/html\r\n"+
                 "\r\n"+
                 "<h1>404</h1>";
@@ -68,10 +65,14 @@ public class HttpResponse implements Response{
 
     @Override
     public void sendOk() throws IOException {
-        String message="HTTP/1.1 200 ok\r\n"+
-                //"Content-Type:text/html\r\n"+
-                "\r\n";
-        send(message);
+        StringBuilder str=new StringBuilder();
+        str.append("HTTP/1.1 200 ok\r\n");
+        str.append("Server:AsensServer\r\n");
+        if(request.getAccept().contains("text/css")){
+            str.append("Content-type:text/css\r\n");
+        }
+        str.append("\r\n");
+        send(str.toString());
     }
 
     @Override

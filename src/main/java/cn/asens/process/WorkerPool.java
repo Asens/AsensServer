@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  **/
 
 public class WorkerPool {
-    private final static int POOL_SIZE=Runtime.getRuntime().availableProcessors();
+    private final static int POOL_SIZE=Runtime.getRuntime().availableProcessors()*2;
     private AtomicInteger index=new AtomicInteger(0);
     private Worker[] workers;
     private final static ExecutorService pool= Executors.newFixedThreadPool(POOL_SIZE);

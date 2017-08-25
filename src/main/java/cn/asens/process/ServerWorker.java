@@ -1,5 +1,8 @@
 package cn.asens.process;
 
+import cn.asens.log.Log;
+import cn.asens.log.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -17,6 +20,7 @@ import static cn.asens.process.ServerContext.*;
  */
 public class ServerWorker implements Worker{
     private Selector selector;
+    private Log log= LoggerFactory.getInstance();
 
     public ServerWorker() {
         try {
@@ -56,7 +60,7 @@ public class ServerWorker implements Worker{
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             if(selectedKeys.isEmpty()) return;
             for (Iterator<SelectionKey> i = selectedKeys.iterator(); i.hasNext(); ) {
-                System.out.println("read");
+                log.debug("processRequest worker begin to read");
                 SelectionKey k = i.next();
                 i.remove();
                 if (k.isReadable()) {

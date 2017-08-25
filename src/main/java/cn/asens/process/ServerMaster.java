@@ -2,6 +2,8 @@ package cn.asens.process;
 
 import cn.asens.Constants;
 import cn.asens.exception.BindFailException;
+import cn.asens.log.Log;
+import cn.asens.log.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -25,6 +27,7 @@ public class ServerMaster implements Master{
 
     private final static Queue<MasterTask> taskQueue=new ConcurrentLinkedQueue<MasterTask>();
 
+    private static Log log= LoggerFactory.getInstance();
 
     public ServerMaster(){
         try {
@@ -45,7 +48,7 @@ public class ServerMaster implements Master{
         Set<SelectionKey> selectedKeys = selector.selectedKeys();
         if(selectedKeys==null||selectedKeys.size()==0) return;
         for (Iterator<SelectionKey> i = selectedKeys.iterator(); i.hasNext(); ) {
-            System.out.println("accept");
+            log.debug("master handleRequest accept");
             SelectionKey k = i.next();
             i.remove();
             if (k.isAcceptable()) {
@@ -78,9 +81,7 @@ public class ServerMaster implements Master{
 
         for(;;){
             try {
-                System.out.println("before select");
                 selector.select();
-                System.out.println("master selector wakeup");
                 process();
                 handleRequest();
             } catch (IOException e) {
@@ -100,7 +101,7 @@ public class ServerMaster implements Master{
                 socketChannel.socket().bind(address, Constants.BACK_LOG);
                 socketChannel.configureBlocking(false);
                 socketChannel.register(selector, SelectionKey.OP_ACCEPT,workerPool);
-                //selector.wakeup();
+                log.info("AsensServer has started up");
             }catch (Throwable t){
                 throw new BindFailException("master bind fail :"+t.getMessage());
             }

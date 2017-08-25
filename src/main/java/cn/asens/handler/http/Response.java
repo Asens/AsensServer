@@ -1,8 +1,6 @@
-package cn.asens.http;
+package cn.asens.handler.http;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.nio.channels.SocketChannel;
 
 /**
