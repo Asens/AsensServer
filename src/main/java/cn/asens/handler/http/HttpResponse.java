@@ -86,4 +86,10 @@ public class HttpResponse implements Response{
         buffer.flip();
         channel.write(buffer);
     }
+
+    @Override
+    public void send(ByteBuffer[] arr) throws IOException {
+        long writeBytes=channel.write(arr);
+        log.debug("writeBytes "+writeBytes);
+    }
 }

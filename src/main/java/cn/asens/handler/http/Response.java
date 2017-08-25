@@ -1,6 +1,7 @@
 package cn.asens.handler.http;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -20,4 +21,6 @@ public interface Response {
     void sendOk() throws IOException;
 
     void send(byte[] bytes, int index, int length) throws IOException;
+
+    void send(ByteBuffer[] arr) throws IOException;
 }
