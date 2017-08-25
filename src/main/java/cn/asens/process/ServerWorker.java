@@ -74,6 +74,7 @@ public class ServerWorker implements Worker{
                 int readyOps = k.readyOps();
                 if ((readyOps & SelectionKey.OP_WRITE) != 0) {
                     //TODO I should write here instead of write in response
+                    //把内容写到队列里面
                     //write(k);
                 }
             }
