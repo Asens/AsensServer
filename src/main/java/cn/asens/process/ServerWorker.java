@@ -71,6 +71,11 @@ public class ServerWorker implements Worker{
                          channel.close();
                     }
                 }
+                int readyOps = k.readyOps();
+                if ((readyOps & SelectionKey.OP_WRITE) != 0) {
+                    //TODO I should write here instead of write in response
+                    //write(k);
+                }
             }
         }
     }
