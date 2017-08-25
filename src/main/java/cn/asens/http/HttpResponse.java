@@ -1,10 +1,14 @@
 package cn.asens.http;
 
+import cn.asens.log.Log;
+import cn.asens.log.LoggerFactory;
+
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -12,6 +16,8 @@ import java.nio.channels.SocketChannel;
  * Created by Asens on 2017/8/24
  */
 public class HttpResponse implements Response{
+    private Log log= LoggerFactory.getInstance();
+
     private SocketChannel channel;
 
     public HttpResponse(SocketChannel channel) {
@@ -35,14 +41,18 @@ public class HttpResponse implements Response{
     @Override
     public void send(String message) throws IOException {
         ByteBuffer buffer=ByteBuffer.allocate(1024);
-        buffer.put(message.getBytes());
+        try {
+            buffer.put(message.getBytes());
+        }catch (BufferOverflowException e){
+            log.error(e.getMessage());
+        }
         buffer.flip();
         channel.write(buffer);
     }
 
     @Override
     public void send(byte[] bytes) throws IOException {
-        send(new String(bytes,"UTF-8"));
+        send(bytes,0,bytes.length);
     }
 
 
@@ -66,6 +76,13 @@ public class HttpResponse implements Response{
 
     @Override
     public void send(byte[] bytes, int index, int length) throws IOException {
-        send(new String(bytes,index,length,"UTF-8"));
+        ByteBuffer buffer=ByteBuffer.allocate(1024);
+        try {
+            buffer.put(bytes,index,length);
+        }catch (BufferOverflowException e){
+            log.error(e.getMessage());
+        }
+        buffer.flip();
+        channel.write(buffer);
     }
 }
