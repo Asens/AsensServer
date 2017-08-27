@@ -64,6 +64,7 @@ public class SocketChannelWrapper {
 
         if (complete()) {
             log.debug("all complete socket close");
+            //TODO if use http/1.1,should not close here
             socketChannel.close();
         }
     }

@@ -78,9 +78,11 @@ public class HttpResponse implements Response{
             str.append("Content-type:text/css\r\n");
         }
 
-//        if(request.getProtocol().equals("HTTP/1.1")){
-//            str.append("Connection:Keep-Alive\r\n");
-//        }
+        if(request.getProtocol().equals("HTTP/1.1")){
+            str.append("Connection:Keep-Alive\r\n");
+            //str.append("Transfer-Encoding:chunked\r\n");
+            //TODO content-length
+        }
         str.append("\r\n");
         send(str.toString());
     }
