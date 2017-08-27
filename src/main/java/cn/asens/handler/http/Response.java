@@ -1,6 +1,7 @@
 package cn.asens.handler.http;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -23,4 +24,8 @@ public interface Response {
     void send(byte[] bytes, int index, int length) throws IOException;
 
     void send(ByteBuffer[] arr) throws IOException;
+
+    void write(RandomAccessFile file);
+
+    void flush() throws IOException;
 }

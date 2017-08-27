@@ -27,8 +27,10 @@ public class HttpProcessor implements Processor{
 
     private void whiteFile(String path, Response response) throws IOException {
         String basePath= ServerContext.ROOT_PATH+"index";
-        if(path.equals("/")) path="index.html";
+        if(path.equals("/")) path="/index.html";
         String filePath=basePath+path;
+
+
         File target=new File(filePath);
         log.debug(filePath);
         if(!target.exists()){
@@ -37,25 +39,13 @@ public class HttpProcessor implements Processor{
             return;
         }
         response.sendOk();
-        transferTo(target,response);
+        RandomAccessFile accessFile=new RandomAccessFile(filePath,"r");
+        transferTo(accessFile,response);
     }
 
-    private void transferTo(File target, Response response) throws IOException {
-        InputStream is=new FileInputStream(target);
-        BufferedInputStream bis=new BufferedInputStream(is);
-        List<ByteBuffer> list=new ArrayList<>();
-        byte[] bytes=new byte[1024];
-        int b;
-        while((b=bis.read(bytes))!=-1){
-            ByteBuffer buffer=ByteBuffer.allocate(1024);
-            buffer.put(bytes,0,b);
-            buffer.flip();
-            list.add(buffer);
-        }
-
-        response.send(list.toArray(new ByteBuffer[list.size()]));
-
-        is.close();
-        response.close();
+    private void transferTo(RandomAccessFile target, Response response) throws IOException {
+        response.write(target);
+        response.flush();
+        //response.close();
     }
 }

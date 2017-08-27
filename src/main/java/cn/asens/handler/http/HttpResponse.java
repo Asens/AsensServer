@@ -1,11 +1,17 @@
 package cn.asens.handler.http;
 
+import cn.asens.componet.FileMessage;
+import cn.asens.componet.ResponseContentImpl;
+import cn.asens.componet.SocketChannelWrapper;
 import cn.asens.log.Log;
 import cn.asens.log.LoggerFactory;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -14,10 +20,10 @@ import java.nio.channels.SocketChannel;
 public class HttpResponse implements Response{
     private Log log= LoggerFactory.getInstance();
     private HttpRequest request;
-    private SocketChannel channel;
+    private SocketChannelWrapper channelWrapper;
 
-    public HttpResponse(SocketChannel channel, HttpRequest request) {
-        this.channel = channel;
+    public HttpResponse(SocketChannelWrapper channelWrapper, HttpRequest request) {
+        this.channelWrapper = channelWrapper;
         this.request=request;
     }
 
@@ -44,7 +50,7 @@ public class HttpResponse implements Response{
             log.error(e.getMessage());
         }
         buffer.flip();
-        channel.write(buffer);
+        channelWrapper.socketChannel.write(buffer);
     }
 
     @Override
@@ -55,12 +61,12 @@ public class HttpResponse implements Response{
 
     @Override
     public void close() throws IOException {
-        channel.close();
+        channelWrapper.socketChannel.close();
     }
 
     @Override
     public SocketChannel getChannel() {
-        return channel;
+        return channelWrapper.socketChannel;
     }
 
     @Override
@@ -71,6 +77,10 @@ public class HttpResponse implements Response{
         if(request.getAccept().contains("text/css")){
             str.append("Content-type:text/css\r\n");
         }
+
+//        if(request.getProtocol().equals("HTTP/1.1")){
+//            str.append("Connection:Keep-Alive\r\n");
+//        }
         str.append("\r\n");
         send(str.toString());
     }
@@ -84,13 +94,24 @@ public class HttpResponse implements Response{
             log.error(e.getMessage());
         }
         buffer.flip();
-        channel.write(buffer);
+        channelWrapper.socketChannel.write(buffer);
     }
 
     @Override
     public void send(ByteBuffer[] arr) throws IOException {
-        while(arr[arr.length-1].hasRemaining()){
-            channel.write(arr);
-        }
+
     }
+
+    @Override
+    public void write(RandomAccessFile file){
+        FileMessage fileMessage=new FileMessage(file);
+        channelWrapper.write(new ResponseContentImpl(fileMessage));
+    }
+
+    @Override
+    public void flush() throws IOException {
+        channelWrapper.flush();
+    }
+
+
 }

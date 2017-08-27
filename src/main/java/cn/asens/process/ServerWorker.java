@@ -1,5 +1,6 @@
 package cn.asens.process;
 
+import cn.asens.componet.SocketChannelWrapper;
 import cn.asens.log.Log;
 import cn.asens.log.LoggerFactory;
 
@@ -63,33 +64,39 @@ public class ServerWorker implements Worker{
                 log.debug("processRequest worker begin to read");
                 SelectionKey k = i.next();
                 i.remove();
-                if (k.isReadable()) {
+                int readyOps = k.readyOps();
+
+                if ((readyOps & SelectionKey.OP_WRITE) != 0) {
+                    log.debug("selector is writeAble");
+                    SocketChannelWrapper channelWrapper = (SocketChannelWrapper) k.attachment();
+                    channelWrapper.flush();
+                }
+
+                if ((readyOps & SelectionKey.OP_READ) != 0) {
                     try {
                         handleRead(k);
                     }catch (IOException e){
+                        log.error("OP_READ IOException");
                         SocketChannel channel = (SocketChannel) k.attachment();
                          channel.close();
                     }
                 }
-                int readyOps = k.readyOps();
-                if ((readyOps & SelectionKey.OP_WRITE) != 0) {
-                    //TODO I should write here instead of write in response
-                    //把内容写到队列里面
-                    //write(k);
-                }
+
+
             }
         }
     }
 
     private void handleRead(SelectionKey k) throws IOException {
-        SocketChannel channel = (SocketChannel) k.attachment();
-        channel.configureBlocking(false);
+        SocketChannelWrapper channelWrapper = (SocketChannelWrapper) k.attachment();
+        channelWrapper.setSelectionKey(k);
+        channelWrapper.socketChannel.configureBlocking(false);
         //channel.socket().setSendBufferSize(4*1024*1024);
         ByteBuffer buf = ByteBuffer.allocate(1024);
         int readBytes = 0;
         int ret = 0;
         boolean failure = true;
-        while ((ret = channel.read(buf)) > 0) {
+        while ((ret = channelWrapper.socketChannel.read(buf)) > 0) {
             readBytes += ret;
             if (!buf.hasRemaining())
                 break;
@@ -97,12 +104,12 @@ public class ServerWorker implements Worker{
         }
         if (readBytes > 0) {
             buf.flip();
-            fireMessageReceived(buf,channel);
+            fireMessageReceived(buf,channelWrapper);
         }
 
         if (ret < 0|| failure) {
             k.cancel();
-            channel.close();
+            channelWrapper.socketChannel.close();
         }
     }
 
@@ -114,9 +121,10 @@ public class ServerWorker implements Worker{
             }
             WorkerTask task=taskQueue.poll();
             SocketChannel channel=task.getSocketChannel();
+            SocketChannelWrapper wrapper=new SocketChannelWrapper(channel);
             try {
                 channel.configureBlocking(false);
-                channel.register(selector, SelectionKey.OP_READ,channel);
+                channel.register(selector, SelectionKey.OP_READ,wrapper);
             }catch (IOException e) {
                 e.printStackTrace();
             }

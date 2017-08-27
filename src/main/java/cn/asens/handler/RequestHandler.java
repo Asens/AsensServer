@@ -1,5 +1,7 @@
 package cn.asens.handler;
 
+import cn.asens.componet.SocketChannelWrapper;
+
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -10,5 +12,5 @@ import java.nio.channels.SocketChannel;
  **/
 
 public interface RequestHandler {
-    void handle(ByteBuffer buffer, SocketChannel channel);
+    void handle(ByteBuffer buffer, SocketChannelWrapper wrapper);
 }

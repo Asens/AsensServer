@@ -1,5 +1,7 @@
 package cn.asens.handler;
 
+import cn.asens.componet.SocketChannelWrapper;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -26,7 +28,7 @@ public class DefaultHandler implements RequestHandler{
     }
 
     @Override
-    public void handle(ByteBuffer buffer, SocketChannel channel) {
+    public void handle(ByteBuffer buffer, SocketChannelWrapper wrapper) {
 //        String message = null;
 //        try {
 //            message = new String(buffer.array(), "utf-8");
@@ -35,7 +37,7 @@ public class DefaultHandler implements RequestHandler{
 //        }
 //        System.out.println(message);
         try {
-            writeBack(channel);
+            writeBack(wrapper.socketChannel);
         } catch (IOException e) {
             e.printStackTrace();
         }

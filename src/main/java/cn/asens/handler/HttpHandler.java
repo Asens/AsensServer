@@ -1,5 +1,6 @@
 package cn.asens.handler;
 
+import cn.asens.componet.SocketChannelWrapper;
 import cn.asens.handler.RequestHandler;
 import cn.asens.handler.http.HttpProcessor;
 import cn.asens.handler.http.HttpRequest;
@@ -19,7 +20,7 @@ public class HttpHandler implements RequestHandler{
     private static Log log= LoggerFactory.getInstance();
 
     @Override
-    public void handle(ByteBuffer buffer, SocketChannel channel) {
+    public void handle(ByteBuffer buffer, SocketChannelWrapper wrapper) {
         String message = null;
         try {
             message = new String(buffer.array(), "utf-8");
@@ -28,7 +29,7 @@ public class HttpHandler implements RequestHandler{
         }
         HttpRequest request=new HttpRequest(message);
         request.parseHttpRequest();
-        HttpResponse response=new HttpResponse(channel,request);
+        HttpResponse response=new HttpResponse(wrapper,request);
         HttpProcessor processor=new HttpProcessor();
         processor.process(request,response);
     }

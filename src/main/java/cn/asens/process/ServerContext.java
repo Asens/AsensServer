@@ -1,5 +1,6 @@
 package cn.asens.process;
 
+import cn.asens.componet.SocketChannelWrapper;
 import cn.asens.handler.RequestHandler;
 import cn.asens.handler.HttpHandler;
 import cn.asens.log.Log;
@@ -28,7 +29,7 @@ public class ServerContext {
         return url.getFile();
     }
 
-    public static void fireMessageReceived(ByteBuffer buffer, SocketChannel channel){
-        handler.handle(buffer,channel);
+    public static void fireMessageReceived(ByteBuffer buffer, SocketChannelWrapper channelWrapper){
+        handler.handle(buffer,channelWrapper);
     }
 }
