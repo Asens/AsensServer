@@ -78,7 +78,7 @@ public class ServerWorker implements Worker{
                     }catch (IOException e){
                         log.error("OP_READ IOException");
                         SocketChannel channel = (SocketChannel) k.attachment();
-                         channel.close();
+                        channel.close();
                     }
                 }
 

@@ -11,23 +11,19 @@ import java.nio.channels.SocketChannel;
 public interface Response {
     void sendError(int status);
 
-    void send(String message) throws IOException;
-
-    void send(byte[] bytes) throws IOException;
-
     void close() throws IOException;
 
     SocketChannel getChannel();
 
     void sendOk(long length) throws IOException;
 
-    void sendOk() throws IOException;
-
-    void send(byte[] bytes, int index, int length) throws IOException;
-
-    void send(ByteBuffer[] arr) throws IOException;
-
     void write(RandomAccessFile file);
 
     void flush() throws IOException;
+
+    void writeAndFlush(String message) throws IOException;
+
+    void setContentType(String type);
+
+    void setHeaderEnd();
 }

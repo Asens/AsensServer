@@ -19,13 +19,13 @@ public class HttpProcessor implements Processor{
     public void process(Request request, Response response) {
         String path=request.getRequestPath();
         try {
-            whiteFile(path,response);
+            whiteFile(path,response,request);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void whiteFile(String path, Response response) throws IOException {
+    private void whiteFile(String path, Response response, Request request) throws IOException {
         String basePath= ServerContext.ROOT_PATH+"index";
         if(path.equals("/")) path="/index.html";
         String filePath=basePath+path;
@@ -40,6 +40,11 @@ public class HttpProcessor implements Processor{
         }
         RandomAccessFile accessFile=new RandomAccessFile(filePath,"r");
         response.sendOk(accessFile.length());
+
+        if(request.getAccept().contains("text/css")){
+            response.setContentType("text/css");
+        }
+        response.setHeaderEnd();
 
         transferTo(accessFile,response);
     }

@@ -3,6 +3,7 @@ package cn.asens.handler.http;
 import cn.asens.componet.FileMessage;
 import cn.asens.componet.ResponseContentImpl;
 import cn.asens.componet.SocketChannelWrapper;
+import cn.asens.componet.StringMessage;
 import cn.asens.log.Log;
 import cn.asens.log.LoggerFactory;
 
@@ -34,28 +35,12 @@ public class HttpResponse implements Response{
                 "\r\n"+
                 "<h1>404</h1>";
         try {
-            send(error);
+            channelWrapper.write(new ResponseContentImpl(error));
+            channelWrapper.flush();
             close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void send(String message) throws IOException {
-        ByteBuffer buffer=ByteBuffer.allocate(1024);
-        try {
-            buffer.put(message.getBytes());
-        }catch (BufferOverflowException e){
-            log.error(e.getMessage());
-        }
-        buffer.flip();
-        channelWrapper.socketChannel.write(buffer);
-    }
-
-    @Override
-    public void send(byte[] bytes) throws IOException {
-        send(bytes,0,bytes.length);
     }
 
 
@@ -82,45 +67,8 @@ public class HttpResponse implements Response{
             str.append("Connection:Keep-Alive\r\n");
             str.append("Content-Length:").append(length).append("\r\n");
         }
-        str.append("\r\n");
-        send(str.toString());
-    }
 
-    @Override
-    public void sendOk() throws IOException {
-        StringBuilder str=new StringBuilder();
-        str.append("HTTP/1.1 200 ok\r\n");
-        str.append("Server:AsensServer\r\n");
-        if(request.getAccept().contains("text/css")){
-            str.append("Content-type:text/css\r\n");
-        }
-
-        if(request.getProtocol().equals("HTTP/1.1")){
-            str.append("Connection:Keep-Alive\r\n");
-            //str.append("Transfer-Encoding:chunked\r\n");
-            //TODO content-length
-        }
-        str.append("\r\n");
-        send(str.toString());
-    }
-
-
-
-    @Override
-    public void send(byte[] bytes, int index, int length) throws IOException {
-        ByteBuffer buffer=ByteBuffer.allocate(1024);
-        try {
-            buffer.put(bytes,index,length);
-        }catch (BufferOverflowException e){
-            log.error(e.getMessage());
-        }
-        buffer.flip();
-        channelWrapper.socketChannel.write(buffer);
-    }
-
-    @Override
-    public void send(ByteBuffer[] arr) throws IOException {
-
+        channelWrapper.write(new ResponseContentImpl(str.toString()));
     }
 
     @Override
@@ -132,6 +80,24 @@ public class HttpResponse implements Response{
     @Override
     public void flush() throws IOException {
         channelWrapper.flush();
+    }
+
+    @Override
+    public void writeAndFlush(String message) throws IOException {
+        channelWrapper.write(new ResponseContentImpl(message));
+        channelWrapper.flush();
+    }
+
+    @Override
+    public void setContentType(String type) {
+        StringMessage message=new StringMessage("Content-type:"+type+"\r\n");
+        channelWrapper.write(new ResponseContentImpl(message));
+    }
+
+    @Override
+    public void setHeaderEnd() {
+        StringMessage message=new StringMessage("\r\n");
+        channelWrapper.write(new ResponseContentImpl(message));
     }
 
 

@@ -4,6 +4,7 @@ import cn.asens.log.Log;
 import cn.asens.log.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -50,24 +51,27 @@ public class SocketChannelWrapper {
     }
 
     public void flush() throws IOException {
-
+        log.debug("queue length "+queue.size());
         for (ResponseContent responseContent : queue) {
             if (responseContent.hasFileMessage()) {
                 FileMessage message = (FileMessage) responseContent.getMessage();
                 flush(message);
+            }else if(responseContent.hasStringMessage()){
+                StringMessage message=(StringMessage) responseContent.getMessage();
+                flush(message);
             }
+        }
+
+        if (complete()) {
+            log.debug(Thread.currentThread().getName()+ " all complete socket close --"+socketChannel);
+            //socketChannel.close();
         }
 
         if(queue.isEmpty()){
             clearOpWrite();
         }
-
-        if (complete()) {
-            log.debug("all complete socket close --"+socketChannel);
-            //TODO if use http/1.1,should not close here
-            //socketChannel.close();
-        }
     }
+
 
 
 
@@ -98,6 +102,38 @@ public class SocketChannelWrapper {
                 break;
             }
         }
+    }
+
+    private void flush(StringMessage message) throws IOException {
+        String str=message.message();
+        ByteBuffer[] byteBuffers=toBuffers(str);
+        for(int i=0;i<16;i++){
+            long written=socketChannel.write(byteBuffers);
+            message.setPosition(message.getPosition()+written);
+            if(message.getPosition()==message.getTotalCount()){
+                message.setDone(true);
+                break;
+            }
+            if(written==0){
+                registerWrite();
+                break;
+            }
+        }
+    }
+
+    private ByteBuffer[] toBuffers(String str) {
+        byte[] bytes=str.getBytes();
+        if(bytes.length<1024){
+            ByteBuffer[] byteBuffers=new ByteBuffer[1];
+            ByteBuffer buffer=ByteBuffer.allocate(1024);
+            buffer.put(bytes);
+            buffer.flip();
+            byteBuffers[0]=buffer;
+            return byteBuffers;
+        }
+        //TODO
+        log.warn("message out of 1024,handle it later");
+        return new ByteBuffer[0];
     }
 
     private void registerWrite() {
