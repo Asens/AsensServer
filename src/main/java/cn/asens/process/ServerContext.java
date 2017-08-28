@@ -1,6 +1,7 @@
 package cn.asens.process;
 
 import cn.asens.componet.SocketChannelWrapper;
+import cn.asens.handler.DefaultHandler;
 import cn.asens.handler.RequestHandler;
 import cn.asens.handler.HttpHandler;
 import cn.asens.log.Log;

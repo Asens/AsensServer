@@ -16,7 +16,10 @@ public class ResponseContentImpl implements ResponseContent{
 
     public ResponseContentImpl(Message message){
         this.message=message;
-        this.messageType=MessageType.String;
+        if(message instanceof StringMessage)
+            this.messageType=MessageType.String;
+        else if(message instanceof FileMessage)
+            this.messageType=MessageType.File;
     }
 
 

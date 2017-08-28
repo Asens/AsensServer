@@ -53,13 +53,7 @@ public class SocketChannelWrapper {
     public void flush() throws IOException {
         log.debug("queue length "+queue.size());
         for (ResponseContent responseContent : queue) {
-            if (responseContent.hasFileMessage()) {
-                FileMessage message = (FileMessage) responseContent.getMessage();
-                flush(message);
-            }else if(responseContent.hasStringMessage()){
-                StringMessage message=(StringMessage) responseContent.getMessage();
-                flush(message);
-            }
+            flush(responseContent);
         }
 
         if (complete()) {
@@ -86,6 +80,29 @@ public class SocketChannelWrapper {
         }
         return true;
     }
+
+    private void flush(ResponseContent responseContent) throws IOException{
+        switch (responseContent.messageType()){
+            case String:
+                flush((StringMessage) responseContent.getMessage());
+                break;
+            case File:
+                flush((FileMessage) responseContent.getMessage());
+                break;
+            case ByteBuff:
+                //TODO
+                log.warn("not support now");
+                break;
+            case ByteBuffers:
+                //TODO
+                log.warn("not support now");
+                break;
+            default:
+                log.error("should not be here");
+                throw new Error();
+        }
+    }
+
 
     private void flush(FileMessage message) throws IOException {
         FileChannel fileChannel=message.message();
