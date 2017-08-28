@@ -38,8 +38,9 @@ public class HttpProcessor implements Processor{
             response.close();
             return;
         }
-        response.sendOk();
         RandomAccessFile accessFile=new RandomAccessFile(filePath,"r");
+        response.sendOk(accessFile.length());
+
         transferTo(accessFile,response);
     }
 

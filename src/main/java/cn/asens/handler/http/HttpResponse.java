@@ -70,6 +70,23 @@ public class HttpResponse implements Response{
     }
 
     @Override
+    public void sendOk(long length) throws IOException {
+        StringBuilder str=new StringBuilder();
+        str.append("HTTP/1.1 200 ok\r\n");
+        str.append("Server:AsensServer\r\n");
+        if(request.getAccept().contains("text/css")){
+            str.append("Content-type:text/css\r\n");
+        }
+
+        if(request.getProtocol().equals("HTTP/1.1")){
+            str.append("Connection:Keep-Alive\r\n");
+            str.append("Content-Length:").append(length).append("\r\n");
+        }
+        str.append("\r\n");
+        send(str.toString());
+    }
+
+    @Override
     public void sendOk() throws IOException {
         StringBuilder str=new StringBuilder();
         str.append("HTTP/1.1 200 ok\r\n");
@@ -86,6 +103,8 @@ public class HttpResponse implements Response{
         str.append("\r\n");
         send(str.toString());
     }
+
+
 
     @Override
     public void send(byte[] bytes, int index, int length) throws IOException {

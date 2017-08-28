@@ -19,6 +19,8 @@ public interface Response {
 
     SocketChannel getChannel();
 
+    void sendOk(long length) throws IOException;
+
     void sendOk() throws IOException;
 
     void send(byte[] bytes, int index, int length) throws IOException;
