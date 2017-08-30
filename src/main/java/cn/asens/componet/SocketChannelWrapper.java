@@ -149,8 +149,17 @@ public class SocketChannelWrapper {
             return byteBuffers;
         }
         //TODO
+        int size=bytes.length/1024+1;
+        ByteBuffer[] buffers=new ByteBuffer[size];
+        for(int i=0;i<size;i++){
+            buffers[i]=ByteBuffer.allocate(1024);
+            byte[] tem=new byte[1024];
+            System.arraycopy(bytes,i*1024,tem,0,i==size-1?(bytes.length-1024*(size-1)):1024);
+            buffers[i].put(tem);
+            buffers[i].flip();
+        }
         log.warn("message out of 1024,handle it later");
-        return new ByteBuffer[0];
+        return buffers;
     }
 
     private void registerWrite() {

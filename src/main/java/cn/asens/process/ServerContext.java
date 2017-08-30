@@ -2,6 +2,7 @@ package cn.asens.process;
 
 import cn.asens.componet.SocketChannelWrapper;
 import cn.asens.handler.DefaultHandler;
+import cn.asens.handler.ProxyHandler;
 import cn.asens.handler.RequestHandler;
 import cn.asens.handler.HttpHandler;
 import cn.asens.log.Log;
@@ -17,7 +18,7 @@ import java.nio.channels.SocketChannel;
  **/
 
 public class ServerContext {
-    private final static RequestHandler handler=new HttpHandler();
+    private final static RequestHandler handler=new DefaultHandler();
     public final static String ROOT_PATH=rootPath();
     private static Log log= LoggerFactory.getInstance();
 

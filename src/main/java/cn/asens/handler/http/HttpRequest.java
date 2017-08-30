@@ -38,6 +38,7 @@ public class HttpRequest implements Request{
         requestPath=tem[1];
         protocol=tem[2];
         accept=paramMap.get("Accept");
+        host=paramMap.get("Host").replace(" ","");
     }
 
     private Map<String, String> parseParamMap(String message) {

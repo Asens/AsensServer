@@ -18,10 +18,12 @@ public class DefaultHandler implements RequestHandler{
 
 
     private void writeBack(SocketChannelWrapper wrapper) throws IOException{
-        String message="HTTP/1.1 200 ok\r\n"+
-                "Content-Type:text/html\r\n"+
-                "\r\n"+
-                "<div style='text-align:center;padding:50px;'><h1>Welcome to AsensServer</h1></div>";
+        String message="HTTP/1.1 200 ok\n"+
+                "Content-Type:text/html\n"+
+                "\n"+
+                "<div style='text-align:center;padding:50px;'><h1>Welcome to AsensServer</h1>" +
+                "<p>sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</p>" +
+                "</div>";
         wrapper.write(new ResponseContentImpl(new StringMessage(message)));
         wrapper.flush();
         wrapper.socketChannel.close();
@@ -29,13 +31,13 @@ public class DefaultHandler implements RequestHandler{
 
     @Override
     public void handle(ByteBuffer buffer, SocketChannelWrapper wrapper) {
-//        String message = null;
-//        try {
-//            message = new String(buffer.array(), "utf-8");
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println(message);
+        String message = null;
+        try {
+            message = new String(buffer.array(), "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        System.out.println(message);
         try {
             writeBack(wrapper);
         } catch (IOException e) {
