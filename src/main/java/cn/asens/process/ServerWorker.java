@@ -69,7 +69,13 @@ public class ServerWorker implements Worker{
                 if ((readyOps & SelectionKey.OP_WRITE) != 0) {
                     log.debug("selector is writeAble");
                     SocketChannelWrapper channelWrapper = (SocketChannelWrapper) k.attachment();
-                    channelWrapper.flush();
+                    try {
+                        channelWrapper.flush();
+                    }catch (IOException e){
+                        log.error("OP_WRITE IOException");
+                        SocketChannelWrapper wrapper = (SocketChannelWrapper) k.attachment();
+                        wrapper.socketChannel.close();
+                    }
                 }
 
                 if ((readyOps & SelectionKey.OP_READ) != 0) {
@@ -77,8 +83,8 @@ public class ServerWorker implements Worker{
                         handleRead(k);
                     }catch (IOException e){
                         log.error("OP_READ IOException");
-                        SocketChannel channel = (SocketChannel) k.attachment();
-                        channel.close();
+                        SocketChannelWrapper wrapper = (SocketChannelWrapper) k.attachment();
+                        wrapper.socketChannel.close();
                     }
                 }
 

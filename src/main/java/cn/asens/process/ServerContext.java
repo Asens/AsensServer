@@ -18,7 +18,7 @@ import java.nio.channels.SocketChannel;
  **/
 
 public class ServerContext {
-    private final static RequestHandler handler=new DefaultHandler();
+    private final static RequestHandler handler=new ProxyHandler();
     public final static String ROOT_PATH=rootPath();
     private static Log log= LoggerFactory.getInstance();
 
