@@ -1,14 +1,15 @@
 package cn.asens.handler;
 
-import cn.asens.componet.ResponseContentImpl;
-import cn.asens.componet.SocketChannelWrapper;
-import cn.asens.componet.StringMessage;
+import cn.asens.componet.*;
 import cn.asens.handler.http.HttpRequest;
 import cn.asens.util.HttpUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Asens on 2017/8/30.
@@ -23,17 +24,23 @@ public class ProxyHandler implements RequestHandler{
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        if(message!=null&&message.contains("google")) return;
+        if(message!=null&&message.contains("favicon.ico")) return;
         HttpRequest request = new HttpRequest(message);
         request.parseHttpRequest();
-        String host = request.getHost();
-        int port = 80;
 
         try {
-            String s=getHttpBack(host,port,message,wrapper);
-            s=s.replace("Transfer-Encoding:chunked\n","");
-            System.out.println(s);
-            wrapper.write(new ResponseContentImpl(new StringMessage(s)));
+            InputStream is=getHttpBack(request,wrapper);
+            byte[] bytes=new byte[1024];
+            List<ByteBuffer> list=new ArrayList<>();
+            int b;
+            while((b=is.read(bytes))!=-1){
+                ByteBuffer byteBuffer=ByteBuffer.allocate(1024);
+                byteBuffer.put(bytes,0,b);
+                byteBuffer.flip();
+                list.add(byteBuffer);
+            }
+            ByteBuffer[] byteBuffers=list.toArray(new ByteBuffer[list.size()]);
+            wrapper.write(new ResponseContentImpl(new ByteBuffsMessage(byteBuffers)));
             wrapper.flush();
         } catch (IOException e) {
             try {
@@ -42,7 +49,8 @@ public class ProxyHandler implements RequestHandler{
         }
     }
 
-    private String getHttpBack(String host, int port, String message, SocketChannelWrapper wrapper) throws IOException {
-        return HttpUtils.doGet("http://127.0.0.1/",null);
+    private InputStream getHttpBack(HttpRequest request, SocketChannelWrapper wrapper) throws IOException {
+        URL url=new URL(request.getRequestPath());
+        return url.openConnection().getInputStream();
     }
 }

@@ -20,6 +20,10 @@ public class ResponseContentImpl implements ResponseContent{
             this.messageType=MessageType.String;
         else if(message instanceof FileMessage)
             this.messageType=MessageType.File;
+        else if(message instanceof ByteBuffMessage)
+            this.messageType=MessageType.ByteBuff;
+        else if(message instanceof ByteBuffsMessage)
+            this.messageType=MessageType.ByteBuffers;
     }
 
 

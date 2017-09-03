@@ -26,10 +26,6 @@ public class SocketChannelWrapper {
         this.socketChannel = socketChannel;
     }
 
-    public void add(ResponseContent responseContent){
-        queue.add(responseContent);
-    }
-
     public boolean isEmpty(){
         return queue.isEmpty();
     }
@@ -56,9 +52,15 @@ public class SocketChannelWrapper {
             flush(responseContent);
         }
 
+//        try {
+//            Thread.sleep(100);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
         if (complete()) {
             log.debug(Thread.currentThread().getName()+ " all complete socket close --"+socketChannel);
-            //socketChannel.close();
+            socketChannel.close();
         }
 
         if(queue.isEmpty()){
@@ -90,18 +92,27 @@ public class SocketChannelWrapper {
                 flush((FileMessage) responseContent.getMessage());
                 break;
             case ByteBuff:
-                //TODO
-                log.warn("not support now");
+                flush((ByteBuffMessage)responseContent.getMessage());
                 break;
             case ByteBuffers:
-                //TODO
-                log.warn("not support now");
+                flush((ByteBuffsMessage)responseContent.getMessage());
                 break;
             default:
                 log.error("should not be here");
                 throw new Error();
         }
     }
+
+    private void flush(ByteBuffsMessage message) throws IOException {
+        flush(message.message(),message);
+    }
+
+    private void flush(ByteBuffMessage message) throws IOException {
+        ByteBuffer[] byteBuffers=new ByteBuffer[]{message.message()};
+        flush(byteBuffers,message);
+    }
+
+
 
 
     private void flush(FileMessage message) throws IOException {
@@ -124,19 +135,9 @@ public class SocketChannelWrapper {
     private void flush(StringMessage message) throws IOException {
         String str=message.message();
         ByteBuffer[] byteBuffers=toBuffers(str);
-        for(int i=0;i<16;i++){
-            long written=socketChannel.write(byteBuffers);
-            message.setPosition(message.getPosition()+written);
-            if(message.getPosition()==message.getTotalCount()){
-                message.setDone(true);
-                break;
-            }
-            if(written==0){
-                registerWrite();
-                break;
-            }
-        }
+        flush(byteBuffers,message);
     }
+
 
     private ByteBuffer[] toBuffers(String str) {
         byte[] bytes=str.getBytes();
@@ -158,12 +159,30 @@ public class SocketChannelWrapper {
             buffers[i].put(tem);
             buffers[i].flip();
         }
-        log.warn("message out of 1024,handle it later");
         return buffers;
+    }
+
+    private void flush(ByteBuffer[] byteBuffers, Message message) throws IOException {
+        for(int i=0;i<16;i++){
+            long written=socketChannel.write(byteBuffers);
+            log.debug("written:"+written);
+            message.setPosition(message.getPosition()+written);
+            if(message.getPosition()==message.getTotalCount()){
+                message.setDone(true);
+                break;
+            }
+            if(written==0){
+                registerWrite();
+                break;
+            }
+        }
     }
 
     private void registerWrite() {
         SelectionKey key=getSelectionKey();
+
+        if(!key.isValid()) return;
+
         final int interestOps = key.interestOps();
         if ((interestOps & SelectionKey.OP_WRITE) == 0) {
             key.interestOps(interestOps | SelectionKey.OP_WRITE);
@@ -172,6 +191,9 @@ public class SocketChannelWrapper {
 
     private void clearOpWrite() {
         SelectionKey key=getSelectionKey();
+
+        if(!key.isValid()) return;
+
         int interestOps = key.interestOps();
         if ((interestOps & SelectionKey.OP_WRITE) != 0) {
             key.interestOps(interestOps & ~SelectionKey.OP_WRITE);
