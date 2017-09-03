@@ -52,15 +52,9 @@ public class SocketChannelWrapper {
             flush(responseContent);
         }
 
-//        try {
-//            Thread.sleep(100);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
         if (complete()) {
             log.debug(Thread.currentThread().getName()+ " all complete socket close --"+socketChannel);
-            socketChannel.close();
+            //socketChannel.close();
         }
 
         if(queue.isEmpty()){
@@ -149,7 +143,7 @@ public class SocketChannelWrapper {
             byteBuffers[0]=buffer;
             return byteBuffers;
         }
-        //TODO
+
         int size=bytes.length/1024+1;
         ByteBuffer[] buffers=new ByteBuffer[size];
         for(int i=0;i<size;i++){
